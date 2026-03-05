@@ -19,8 +19,8 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
-      - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
+      - ${CLAWDBOT_CONFIG_DIR}:/home/node/.openclaw
+      - ${CLAWDBOT_WORKSPACE_DIR}:/home/node/.openclaw/workspace
       ## Uncomment the lines below to enable sandbox isolation
       ## (agents.defaults.sandbox). Requires Docker CLI in the image
       ## (build with --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1) or use
@@ -34,7 +34,7 @@ services:
     command:
       [
         "node",
-        "dist/index.js",
+        "openclaw.mjs",
         "gateway",
         "--bind",
         "${CLAWDBOT_GATEWAY_BIND}",

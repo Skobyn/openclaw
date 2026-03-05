@@ -1,0 +1,67 @@
+{
+  "id": "context-archive",
+  "kind": "memory",
+  "uiHints": {
+    "provider": {
+      "label": "Embedding Provider",
+      "help": "Provider for embeddings (\"auto\" tries available providers)"
+    },
+    "model": {
+      "label": "Embedding Model",
+      "help": "Model name (leave empty for provider default)",
+      "advanced": true
+    },
+    "dbPath": {
+      "label": "Database Path",
+      "placeholder": "~/.openclaw/context-archive/archive.sqlite",
+      "advanced": true
+    },
+    "autoInject": {
+      "label": "Auto-Inject",
+      "help": "Automatically inject relevant archived context into prompts"
+    },
+    "autoInjectTopK": {
+      "label": "Auto-Inject Top K",
+      "help": "Max results to inject",
+      "advanced": true
+    },
+    "recallTopK": {
+      "label": "Recall Top K",
+      "help": "Max results from context_recall tool",
+      "advanced": true
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "provider": {
+        "type": "string"
+      },
+      "model": {
+        "type": "string"
+      },
+      "dbPath": {
+        "type": "string"
+      },
+      "autoInject": {
+        "type": "boolean"
+      },
+      "autoInjectTopK": {
+        "type": "number"
+      },
+      "autoInjectMinScore": {
+        "type": "number"
+      },
+      "recallTopK": {
+        "type": "number"
+      },
+      "recallMinScore": {
+        "type": "number"
+      },
+      "chunkMaxChars": {
+        "type": "number"
+      }
+    }
+  }
+}
