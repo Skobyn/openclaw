@@ -183,6 +183,8 @@ export type AgentDefaultsConfig = {
   };
   /** Vector memory search configuration (per-agent overrides supported). */
   memorySearch?: MemorySearchConfig;
+  /** Epistemic monitor: contradiction detection and confidence scoring against archived decisions. */
+  epistemic?: AgentEpistemicConfig;
   /** Default thinking level when no /think directive is present. */
   thinkingDefault?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh" | "adaptive";
   /** Default verbose level when no /verbose directive is present. */
@@ -284,6 +286,19 @@ export type AgentDefaultsConfig = {
   };
   /** Optional sandbox settings for non-main sessions. */
   sandbox?: AgentSandboxConfig;
+};
+
+export type AgentEpistemicConfig = {
+  /** Enable the epistemic monitor (default: false). */
+  enabled?: boolean;
+  /** Archive database path. Supports {agentId} placeholder (default: $STATE_DIR/epistemic/{agentId}.sqlite). */
+  archivePath?: string;
+  /** Confidence below this triggers a hard interrupt (default: 0.5). */
+  hardInterruptThreshold?: number;
+  /** Confidence below this triggers a soft nudge (default: 0.7). */
+  softNudgeThreshold?: number;
+  /** Max observed turns before the monitor self-compacts (default: 50). */
+  maxObservedTurns?: number;
 };
 
 export type AgentCompactionMode = "default" | "safeguard";
