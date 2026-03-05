@@ -11,8 +11,6 @@ services:
       - TERM=xterm-256color
       - CLAWDBOT_GATEWAY_BIND=${CLAWDBOT_GATEWAY_BIND}
       - CLAWDBOT_GATEWAY_PORT=${CLAWDBOT_GATEWAY_PORT}
-      - CLAWDBOT_GATEWAY_TOKEN=${CLAWDBOT_GATEWAY_TOKEN}
-      - GOG_KEYRING_PASSWORD=${GOG_KEYRING_PASSWORD}
       - XDG_CONFIG_HOME=${XDG_CONFIG_HOME}
       - PATH=/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       - RUVECTOR_URL=http://host.docker.internal:8765
@@ -31,6 +29,7 @@ services:
     #   - "${DOCKER_GID:-999}"
     ports:
       - "18789:18789"
+    entrypoint: ["/app/scripts/docker-entrypoint.sh"]
     command:
       [
         "node",
