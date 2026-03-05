@@ -1,6 +1,6 @@
 {
   "id": "context-archive",
-  "kind": "memory",
+  "kind": "feature",
   "uiHints": {
     "provider": {
       "label": "Embedding Provider",
