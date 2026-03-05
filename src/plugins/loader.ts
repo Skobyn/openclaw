@@ -102,6 +102,11 @@ const pluginSdkScopedAliasEntries = [
   { subpath: "acpx", srcFile: "acpx.ts", distFile: "acpx.js" },
   { subpath: "bluebubbles", srcFile: "bluebubbles.ts", distFile: "bluebubbles.js" },
   {
+    subpath: "context-archive",
+    srcFile: "context-archive.ts",
+    distFile: "context-archive.js",
+  },
+  {
     subpath: "copilot-proxy",
     srcFile: "copilot-proxy.ts",
     distFile: "copilot-proxy.js",
