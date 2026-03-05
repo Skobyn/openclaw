@@ -1,0 +1,15 @@
+{
+  "name": "@openclaw/context-archive",
+  "version": "2026.3.2",
+  "private": true,
+  "description": "Semantic context archive: embeds and archives conversation chunks before compaction, auto-injects relevant context, provides context_recall tool",
+  "type": "module",
+  "dependencies": {
+    "@sinclair/typebox": "0.34.48"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
