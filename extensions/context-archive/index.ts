@@ -199,7 +199,7 @@ const contextArchivePlugin = {
   name: "Context Archive",
   description:
     "Semantic context archive with embeddings — survives compaction and enables context_recall",
-  kind: "memory" as const,
+  kind: "feature" as const,
   configSchema: contextArchiveConfigSchema,
 
   register(api: OpenClawPluginApi) {

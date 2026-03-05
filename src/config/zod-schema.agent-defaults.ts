@@ -115,6 +115,16 @@ export const AgentDefaultsSchema = z
       })
       .strict()
       .optional(),
+    epistemic: z
+      .object({
+        enabled: z.boolean().optional(),
+        archivePath: z.string().optional(),
+        hardInterruptThreshold: z.number().min(0).max(1).optional(),
+        softNudgeThreshold: z.number().min(0).max(1).optional(),
+        maxObservedTurns: z.number().int().positive().optional(),
+      })
+      .strict()
+      .optional(),
     embeddedPi: z
       .object({
         projectSettingsPolicy: z
