@@ -66,9 +66,8 @@ cfg['gateway']['auth']['token'] = '${GATEWAY_AUTH_TOKEN}'
 cfg.setdefault('hooks', {})
 cfg['hooks']['token'] = '${HOOKS_TOKEN}'
 
-cfg.setdefault('plugins', {}).setdefault('entries', {}).setdefault('context-archive', {}).setdefault('config', {}).setdefault('embedding', {})
-cfg['plugins']['entries']['context-archive']['config']['embedding']['provider'] = 'gemini'
-cfg['plugins']['entries']['context-archive']['config']['embedding']['apiKey'] = '${GEMINI_API_KEY}'
+entries = cfg.setdefault('plugins', {}).setdefault('entries', {})
+entries.setdefault('context-archive', {}).setdefault('config', {})['embedding'] = {'provider': 'gemini', 'apiKey': '${GEMINI_API_KEY}'}
 
 with open(config_path, 'w') as f:
     json.dump(cfg, f, indent=2)
