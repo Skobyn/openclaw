@@ -35,6 +35,9 @@ jobs:
             DEPLOY_DIR="/home/sbens/clawdbot"
             cd "$DEPLOY_DIR"
 
+            echo "==> Ensuring config ownership for container node user..."
+            sudo chown -R 1000:1000 /home/sbens/.clawdbot/
+
             echo "==> Pulling latest code..."
             git fetch origin main
             git reset --hard origin/main
