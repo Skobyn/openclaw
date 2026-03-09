@@ -1,120 +1,139 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
+import fs from "node:fs";
+
+export type EmbeddingProvider = "gemini" | "openai";
+
+export type EmbeddingConfig = {
+  provider: EmbeddingProvider;
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+  dimensions?: number;
+};
 
 export type ContextArchiveConfig = {
-  /** Embedding provider: "auto" tries available providers in order. */
-  provider: "auto" | "openai" | "gemini" | "voyage" | "mistral" | "ollama";
-  /** Embedding model (provider-specific; empty = provider default). */
-  model: string;
-  /** SQLite database path. */
+  embedding: EmbeddingConfig;
   dbPath: string;
-  /** Auto-inject relevant archived context into prompts. */
   autoInject: boolean;
-  /** Max chunks to inject via autoInject. */
-  autoInjectTopK: number;
-  /** Min similarity score for auto-inject results (0-1). */
-  autoInjectMinScore: number;
-  /** Max chunks returned by context_recall tool. */
-  recallTopK: number;
-  /** Min similarity score for recall results (0-1). */
-  recallMinScore: number;
-  /** Max text chars per chunk when archiving. */
-  chunkMaxChars: number;
+  maxInjectChunks: number;
+  chunkTokens: number;
+  consolidateAfter: number;
 };
 
-export const DEFAULT_DB_PATH = join(homedir(), ".openclaw", "context-archive", "archive.sqlite");
+const DEFAULT_GEMINI_MODEL = "gemini-embedding-001";
+const DEFAULT_OPENAI_MODEL = "text-embedding-3-small";
 
-export const DEFAULT_CONFIG: ContextArchiveConfig = {
-  provider: "auto",
-  model: "",
-  dbPath: DEFAULT_DB_PATH,
-  autoInject: true,
-  autoInjectTopK: 3,
-  autoInjectMinScore: 0.3,
-  recallTopK: 10,
-  recallMinScore: 0.2,
-  chunkMaxChars: 2000,
+const EMBEDDING_DIMENSIONS: Record<string, number> = {
+  "gemini-embedding-001": 768,
+  "text-embedding-004": 768,
+  "text-embedding-3-small": 1536,
+  "text-embedding-3-large": 3072,
 };
+
+function resolveDefaultDbPath(): string {
+  const home = homedir();
+  const preferred = join(home, ".openclaw", "context-archive", "archive.db");
+  try {
+    if (fs.existsSync(preferred)) {
+      return preferred;
+    }
+  } catch {
+    // best-effort
+  }
+  return preferred;
+}
+
+const DEFAULT_DB_PATH = resolveDefaultDbPath();
+
+function resolveEnvVars(value: string): string {
+  return value.replace(/\$\{([^}]+)\}/g, (_, envVar) => {
+    const envValue = process.env[envVar];
+    if (!envValue) {
+      throw new Error(`Environment variable ${envVar} is not set`);
+    }
+    return envValue;
+  });
+}
 
 function assertAllowedKeys(value: Record<string, unknown>, allowed: string[], label: string) {
   const unknown = Object.keys(value).filter((key) => !allowed.includes(key));
-  if (unknown.length > 0) {
-    throw new Error(`${label} has unknown keys: ${unknown.join(", ")}`);
+  if (unknown.length === 0) {
+    return;
   }
+  throw new Error(`${label} has unknown keys: ${unknown.join(", ")}`);
+}
+
+export function vectorDimsForModel(provider: EmbeddingProvider, model: string): number {
+  const dims = EMBEDDING_DIMENSIONS[model];
+  if (dims) {
+    return dims;
+  }
+  // Sensible defaults for unknown models
+  return provider === "gemini" ? 768 : 1536;
 }
 
 export const contextArchiveConfigSchema = {
   parse(value: unknown): ContextArchiveConfig {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
-      return { ...DEFAULT_CONFIG };
+      throw new Error("context-archive config required");
     }
     const cfg = value as Record<string, unknown>;
     assertAllowedKeys(
       cfg,
-      [
-        "provider",
-        "model",
-        "dbPath",
-        "autoInject",
-        "autoInjectTopK",
-        "autoInjectMinScore",
-        "recallTopK",
-        "recallMinScore",
-        "chunkMaxChars",
-      ],
+      ["embedding", "dbPath", "autoInject", "maxInjectChunks", "chunkTokens", "consolidateAfter"],
       "context-archive config",
     );
 
+    const embedding = cfg.embedding as Record<string, unknown> | undefined;
+    if (!embedding || typeof embedding.apiKey !== "string") {
+      throw new Error("embedding.apiKey is required");
+    }
+    assertAllowedKeys(
+      embedding,
+      ["provider", "apiKey", "model", "baseUrl", "dimensions"],
+      "embedding config",
+    );
+
+    const provider: EmbeddingProvider =
+      embedding.provider === "openai" ? "openai" : "gemini";
+
+    const defaultModel = provider === "gemini" ? DEFAULT_GEMINI_MODEL : DEFAULT_OPENAI_MODEL;
+    const model = typeof embedding.model === "string" ? embedding.model : defaultModel;
+
+    const maxInjectChunks =
+      typeof cfg.maxInjectChunks === "number" ? Math.floor(cfg.maxInjectChunks) : 3;
+    if (maxInjectChunks < 1 || maxInjectChunks > 20) {
+      throw new Error("maxInjectChunks must be between 1 and 20");
+    }
+
+    const chunkTokens =
+      typeof cfg.chunkTokens === "number" ? Math.floor(cfg.chunkTokens) : 512;
+    if (chunkTokens < 128 || chunkTokens > 4096) {
+      throw new Error("chunkTokens must be between 128 and 4096");
+    }
+
+    const consolidateAfter =
+      typeof cfg.consolidateAfter === "number" ? Math.floor(cfg.consolidateAfter) : 50;
+    if (consolidateAfter < 10 || consolidateAfter > 500) {
+      throw new Error("consolidateAfter must be between 10 and 500");
+    }
+
     return {
-      provider:
-        typeof cfg.provider === "string" &&
-        ["auto", "openai", "gemini", "voyage", "mistral", "ollama"].includes(cfg.provider)
-          ? (cfg.provider as ContextArchiveConfig["provider"])
-          : DEFAULT_CONFIG.provider,
-      model: typeof cfg.model === "string" ? cfg.model : DEFAULT_CONFIG.model,
-      dbPath: typeof cfg.dbPath === "string" ? cfg.dbPath : DEFAULT_CONFIG.dbPath,
-      autoInject: typeof cfg.autoInject === "boolean" ? cfg.autoInject : DEFAULT_CONFIG.autoInject,
-      autoInjectTopK:
-        typeof cfg.autoInjectTopK === "number" ? cfg.autoInjectTopK : DEFAULT_CONFIG.autoInjectTopK,
-      autoInjectMinScore:
-        typeof cfg.autoInjectMinScore === "number"
-          ? cfg.autoInjectMinScore
-          : DEFAULT_CONFIG.autoInjectMinScore,
-      recallTopK: typeof cfg.recallTopK === "number" ? cfg.recallTopK : DEFAULT_CONFIG.recallTopK,
-      recallMinScore:
-        typeof cfg.recallMinScore === "number" ? cfg.recallMinScore : DEFAULT_CONFIG.recallMinScore,
-      chunkMaxChars:
-        typeof cfg.chunkMaxChars === "number" ? cfg.chunkMaxChars : DEFAULT_CONFIG.chunkMaxChars,
+      embedding: {
+        provider,
+        apiKey: resolveEnvVars(embedding.apiKey),
+        model,
+        baseUrl:
+          typeof embedding.baseUrl === "string" ? resolveEnvVars(embedding.baseUrl) : undefined,
+        dimensions:
+          typeof embedding.dimensions === "number" ? embedding.dimensions : undefined,
+      },
+      dbPath: typeof cfg.dbPath === "string" ? cfg.dbPath : DEFAULT_DB_PATH,
+      autoInject: cfg.autoInject !== false,
+      maxInjectChunks,
+      chunkTokens,
+      consolidateAfter,
     };
-  },
-  uiHints: {
-    provider: {
-      label: "Embedding Provider",
-      help: 'Provider for embeddings ("auto" tries available providers)',
-    },
-    model: {
-      label: "Embedding Model",
-      help: "Model name (leave empty for provider default)",
-      advanced: true,
-    },
-    dbPath: {
-      label: "Database Path",
-      placeholder: DEFAULT_DB_PATH,
-      advanced: true,
-    },
-    autoInject: {
-      label: "Auto-Inject",
-      help: "Automatically inject relevant archived context into prompts",
-    },
-    autoInjectTopK: {
-      label: "Auto-Inject Top K",
-      help: "Max results to inject",
-      advanced: true,
-    },
-    recallTopK: {
-      label: "Recall Top K",
-      help: "Max results from context_recall tool",
-      advanced: true,
-    },
   },
 };
