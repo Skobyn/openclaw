@@ -1,0 +1,21 @@
+{
+  "_comment": "Sanitized config template. Copy to ~/.clawdbot/clawdbot.json on the VM and fill in secrets.",
+  "_note": "Plugin entries with configSchema MUST have a valid config even if disabled. Either provide full config or remove the entry.",
+  "gateway": {
+    "mode": "local",
+    "token": "${OPENCLAW_GATEWAY_TOKEN}"
+  },
+  "plugins": {
+    "entries": {
+      "context-archive": {
+        "_comment": "Only include this entry if you have an embedding API key. Remove it if context-archive is disabled.",
+        "config": {
+          "embedding": {
+            "provider": "gemini",
+            "apiKey": "${GEMINI_API_KEY}"
+          }
+        }
+      }
+    }
+  }
+}

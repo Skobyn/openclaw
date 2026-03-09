@@ -39,6 +39,13 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
 
+            echo "==> Validating runtime config before deploy..."
+            docker compose run --rm --no-deps openclaw-gateway \
+              node dist/index.js config validate 2>&1 || {
+              echo "==> Config invalid — aborting deploy to keep bot running."
+              exit 1
+            }
+
             echo "==> Rebuilding Docker image..."
             docker compose build --no-cache
 
