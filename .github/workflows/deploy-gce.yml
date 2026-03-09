@@ -33,6 +33,7 @@ jobs:
             set -euo pipefail
 
             DEPLOY_DIR="/home/sbens/clawdbot"
+            git config --global --add safe.directory "$DEPLOY_DIR"
             cd "$DEPLOY_DIR"
 
             echo "==> Pulling latest code..."
