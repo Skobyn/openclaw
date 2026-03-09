@@ -66,6 +66,8 @@ cfg['gateway']['auth']['token'] = '${GATEWAY_AUTH_TOKEN}'
 cfg.setdefault('hooks', {})
 cfg['hooks']['token'] = '${HOOKS_TOKEN}'
 
+cfg.setdefault('gateway', {}).setdefault('controlUi', {})['allowedOrigins'] = ['chrome-extension://pfhemcnpfilapbppdkfemikblgnnikdp']
+
 plugins = cfg.setdefault('plugins', {})
 plugins.setdefault('slots', {})['memory'] = 'context-archive'
 entries = plugins.setdefault('entries', {})
