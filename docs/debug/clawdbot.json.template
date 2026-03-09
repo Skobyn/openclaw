@@ -44,7 +44,7 @@
   },
   "plugins": {
     "entries": {
-      "_note": "Only include context-archive if you have an embedding API key. Remove the entry entirely if disabled.",
+      "_note": "GEMINI_API_KEY is fetched from Secret Manager by fetch-secrets.sh and available as an env var. The ${GEMINI_API_KEY} reference is resolved at runtime by the plugin config loader.",
       "context-archive": {
         "config": {
           "embedding": {
