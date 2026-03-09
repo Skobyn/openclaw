@@ -66,7 +66,9 @@ cfg['gateway']['auth']['token'] = '${GATEWAY_AUTH_TOKEN}'
 cfg.setdefault('hooks', {})
 cfg['hooks']['token'] = '${HOOKS_TOKEN}'
 
-entries = cfg.setdefault('plugins', {}).setdefault('entries', {})
+plugins = cfg.setdefault('plugins', {})
+plugins.setdefault('slots', {})['memory'] = 'context-archive'
+entries = plugins.setdefault('entries', {})
 entries.setdefault('context-archive', {}).setdefault('config', {})['embedding'] = {'provider': 'gemini', 'apiKey': '${GEMINI_API_KEY}'}
 
 with open(config_path, 'w') as f:
