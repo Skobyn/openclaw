@@ -66,7 +66,7 @@ cfg['gateway']['auth']['token'] = '${GATEWAY_AUTH_TOKEN}'
 cfg.setdefault('hooks', {})
 cfg['hooks']['token'] = '${HOOKS_TOKEN}'
 
-cfg.setdefault('gateway', {}).setdefault('controlUi', {})['allowedOrigins'] = ['chrome-extension://pfhemcnpfilapbppdkfemikblgnnikdp']
+cfg.setdefault('gateway', {}).setdefault('controlUi', {})['allowedOrigins'] = ['chrome-extension://pfhemcnpfilapbppdkfemikblgnnikdp', 'http://127.0.0.1:18789']
 
 plugins = cfg.setdefault('plugins', {})
 plugins.setdefault('slots', {})['memory'] = 'context-archive'
