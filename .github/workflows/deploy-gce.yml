@@ -1,0 +1,51 @@
+name: Deploy to GCE
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.GCE_HOST }}
+          username: ${{ secrets.GCE_USER }}
+          key: ${{ secrets.GCE_SSH_KEY }}
+          script_stop: true
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+
+            DEPLOY_DIR="/home/sbens/clawdbot"
+            cd "$DEPLOY_DIR"
+
+            echo "==> Pulling latest code..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "==> Rebuilding Docker image..."
+            docker compose build --no-cache
+
+            echo "==> Restarting container..."
+            docker compose down
+            docker compose up -d
+
+            echo "==> Waiting for health check..."
+            sleep 5
+            if docker compose ps | grep -q "Up"; then
+              echo "==> Deploy successful!"
+              docker compose ps
+            else
+              echo "==> Deploy FAILED! Container not running."
+              docker compose logs --tail=50
+              exit 1
+            fi
