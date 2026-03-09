@@ -5,10 +5,47 @@
     "mode": "local",
     "token": "${OPENCLAW_GATEWAY_TOKEN}"
   },
+  "hooks": {
+    "enabled": true,
+    "path": "/hooks",
+    "token": "${HOOKS_TOKEN}",
+    "mappings": [
+      {
+        "id": "gmail-inbox",
+        "match": { "path": "/gmail" },
+        "action": "agent",
+        "wakeMode": "now",
+        "messageTemplate": "📧 **New Email**\n\n**From:** {{from}}\n**Subject:** {{subject}}\n**Priority:** {{priority}}\n\n> {{body}}\n\n---\nShould I draft a reply, summarize, or mark for later?",
+        "channel": "slack",
+        "deliver": true,
+        "to": "channel:${SLACK_DM_CHANNEL}"
+      },
+      {
+        "id": "calendar-event",
+        "match": { "path": "/calendar" },
+        "action": "agent",
+        "wakeMode": "now",
+        "messageTemplate": "📅 **Upcoming: {{title}}**\n\n⏰ {{time}} ({{minutesUntil}} min from now)\n👥 {{attendees}}\n📍 {{location}}\n\n{{#if description}}📝 {{description}}{{/if}}\n\n---\nWant me to prep talking points, look up attendees, or remind you of relevant context?",
+        "channel": "slack",
+        "deliver": true,
+        "to": "channel:${SLACK_DM_CHANNEL}"
+      },
+      {
+        "id": "plaud-transcript",
+        "match": { "path": "/plaud" },
+        "action": "agent",
+        "wakeMode": "now",
+        "messageTemplate": "🎙️ **New Plaud Recording**\n\n**File:** {{fileName}}\n**Recorded:** {{recordedAt}}\n\n**Summary:**\n{{summary}}\n\n**Full Transcript:**\n{{transcript}}\n\n---\nAnalyze this and take appropriate action: create Motion tasks for action items, research topics that need investigation, develop ideas that are dev-related, and store everything in Ruvector for future reference.",
+        "channel": "slack",
+        "deliver": true,
+        "to": "channel:${SLACK_DM_CHANNEL}"
+      }
+    ]
+  },
   "plugins": {
     "entries": {
+      "_note": "Only include context-archive if you have an embedding API key. Remove the entry entirely if disabled.",
       "context-archive": {
-        "_comment": "Only include this entry if you have an embedding API key. Remove it if context-archive is disabled.",
         "config": {
           "embedding": {
             "provider": "gemini",
