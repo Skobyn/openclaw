@@ -14,14 +14,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
         with:
-          host: ${{ secrets.GCE_HOST }}
-          username: ${{ secrets.GCE_USER }}
-          key: ${{ secrets.GCE_SSH_KEY }}
-          command_timeout: 10m
-          script: |
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy via IAP tunnel
+        uses: google-github-actions/ssh-compute@v1
+        with:
+          instance_name: scott-clawdbot
+          zone: us-central1-b
+          project_id: apex-internal-apps
+          ssh_private_key: ${{ secrets.GCE_SSH_KEY }}
+          command: |
             set -euo pipefail
 
             DEPLOY_DIR="/home/sbens/clawdbot"
