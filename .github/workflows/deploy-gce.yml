@@ -31,9 +31,8 @@ jobs:
           ssh_private_key: ${{ secrets.GCE_SSH_KEY }}
           command: |
             set -euo pipefail
-
+            sudo -u sbens bash -euo pipefail << 'DEPLOY'
             DEPLOY_DIR="/home/sbens/clawdbot"
-            git config --global --add safe.directory "$DEPLOY_DIR"
             cd "$DEPLOY_DIR"
 
             echo "==> Pulling latest code..."
@@ -57,3 +56,4 @@ jobs:
               docker compose logs --tail=50
               exit 1
             fi
+            DEPLOY
