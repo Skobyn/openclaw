@@ -1,7 +1,9 @@
 name: Deploy to GCE
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Docker Release"]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -13,6 +15,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
@@ -31,7 +36,9 @@ jobs:
           ssh_private_key: ${{ secrets.GCE_SSH_KEY }}
           command: |
             set -euo pipefail
-            sudo -u sbens bash -euo pipefail << 'DEPLOY'
+            export GHCR_TOKEN='${{ secrets.GHCR_TOKEN }}'
+            export GHCR_USER='${{ secrets.GHCR_USER }}'
+            sudo -u sbens --preserve-env=GHCR_TOKEN,GHCR_USER bash -euo pipefail << 'DEPLOY'
             DEPLOY_DIR="/home/sbens/clawdbot"
             cd "$DEPLOY_DIR"
 
@@ -42,15 +49,16 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
 
+            echo "==> Pulling latest image from GHCR..."
+            echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+            docker compose pull
+
             echo "==> Validating runtime config before deploy..."
             docker compose run --rm --no-deps clawdbot-gateway \
               node dist/index.js config validate 2>&1 || {
               echo "==> Config invalid — aborting deploy to keep bot running."
               exit 1
             }
-
-            echo "==> Rebuilding Docker image..."
-            docker compose build --no-cache
 
             echo "==> Restarting container..."
             docker compose down
