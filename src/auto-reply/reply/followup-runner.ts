@@ -9,6 +9,7 @@ import type { SessionEntry } from "../../config/sessions.js";
 import type { TypingMode } from "../../config/types.js";
 import { logVerbose } from "../../globals.js";
 import { registerAgentRunContext } from "../../infra/agent-events.js";
+import { enqueueSystemEvent } from "../../infra/system-events.js";
 import { defaultRuntime } from "../../runtime.js";
 import { isInternalMessageChannel } from "../../utils/message-channel.js";
 import { stripHeartbeatToken } from "../heartbeat.js";
@@ -16,6 +17,7 @@ import type { OriginatingChannelType } from "../templating.js";
 import { isSilentReplyText, SILENT_REPLY_TOKEN } from "../tokens.js";
 import type { GetReplyOptions, ReplyPayload } from "../types.js";
 import { resolveRunAuthProfile } from "./agent-runner-utils.js";
+import { readPostCompactionContext } from "./post-compaction-context.js";
 import {
   resolveOriginAccountId,
   resolveOriginMessageProvider,
@@ -104,6 +106,9 @@ export function createFollowupRunner(params: {
           threadId: queued.originatingThreadId,
           cfg: queued.run.config,
         });
+        if (result.ok && queued.hasRepliedRef) {
+          queued.hasRepliedRef.value = true;
+        }
         if (!result.ok) {
           const errorMsg = result.error ?? "unknown error";
           logVerbose(`followup queue: route-reply failed: ${errorMsg}`);
@@ -121,10 +126,16 @@ export function createFollowupRunner(params: {
           });
           if (opts?.onBlockReply && origin && origin === provider) {
             await opts.onBlockReply(payload);
+            if (queued.hasRepliedRef) {
+              queued.hasRepliedRef.value = true;
+            }
           }
         }
       } else if (opts?.onBlockReply) {
         await opts.onBlockReply(payload);
+        if (queued.hasRepliedRef) {
+          queued.hasRepliedRef.value = true;
+        }
       }
     }
   };
@@ -209,6 +220,7 @@ export function createFollowupRunner(params: {
               timeoutMs: queued.run.timeoutMs,
               runId,
               allowTransientCooldownProbe: runOptions?.allowTransientCooldownProbe,
+              hasRepliedRef: queued.hasRepliedRef ?? opts?.hasRepliedRef,
               blockReplyBreak: queued.run.blockReplyBreak,
               bootstrapPromptWarningSignaturesSeen,
               bootstrapPromptWarningSignature:
@@ -334,6 +346,24 @@ export function createFollowupRunner(params: {
           lastCallUsage: runResult.meta?.agentMeta?.lastCallUsage,
           contextTokensUsed,
         });
+
+        // Inject post-compaction workspace context so subsequent turns
+        // (including queued followups) see refreshed context rather than
+        // running against a half-compacted session.
+        if (queued.run.sessionKey) {
+          try {
+            const contextContent = await readPostCompactionContext(
+              queued.run.workspaceDir ?? process.cwd(),
+              queued.run.config,
+            );
+            if (contextContent) {
+              enqueueSystemEvent(contextContent, { sessionKey: queued.run.sessionKey });
+            }
+          } catch {
+            // Silent failure — post-compaction context is best-effort
+          }
+        }
+
         if (queued.run.verboseLevel && queued.run.verboseLevel !== "off") {
           const suffix = typeof count === "number" ? ` (count ${count})` : "";
           finalPayloads.unshift({

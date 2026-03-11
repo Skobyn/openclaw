@@ -216,6 +216,11 @@ export async function runReplyAgent(params: {
   }
 
   if (activeRunQueueAction === "enqueue-followup") {
+    // Carry the current hasRepliedRef state into the queued run so the
+    // followup runner can make correct Slack threading decisions.
+    if (opts?.hasRepliedRef) {
+      followupRun.hasRepliedRef = { value: opts.hasRepliedRef.value };
+    }
     enqueueFollowupRun(queueKey, followupRun, resolvedQueue);
     await touchActiveSessionEntry();
     typing.cleanup();
@@ -670,18 +675,18 @@ export async function runReplyAgent(params: {
         contextTokensUsed,
       });
 
-      // Inject post-compaction workspace context for the next agent turn
+      // Inject post-compaction workspace context for the next agent turn.
+      // Await so the system event is enqueued before the followup queue drains.
       if (sessionKey) {
         const workspaceDir = process.cwd();
-        readPostCompactionContext(workspaceDir, cfg)
-          .then((contextContent) => {
-            if (contextContent) {
-              enqueueSystemEvent(contextContent, { sessionKey });
-            }
-          })
-          .catch(() => {
-            // Silent failure — post-compaction context is best-effort
-          });
+        try {
+          const contextContent = await readPostCompactionContext(workspaceDir, cfg);
+          if (contextContent) {
+            enqueueSystemEvent(contextContent, { sessionKey });
+          }
+        } catch {
+          // Silent failure — post-compaction context is best-effort
+        }
       }
 
       if (verboseEnabled) {
