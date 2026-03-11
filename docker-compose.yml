@@ -20,6 +20,8 @@ services:
     volumes:
       - ${CLAWDBOT_CONFIG_DIR}:/home/node/.openclaw
       - ${CLAWDBOT_WORKSPACE_DIR}:/home/node/.openclaw/workspace
+      - ./scripts/docker-entrypoint.sh:/app/scripts/docker-entrypoint.sh:ro
+      - ./scripts/fetch-secrets.sh:/app/scripts/fetch-secrets.sh:ro
       ## Uncomment the lines below to enable sandbox isolation
       ## (agents.defaults.sandbox). Requires Docker CLI in the image
       ## (build with --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1) or use
