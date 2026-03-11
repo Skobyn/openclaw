@@ -479,6 +479,7 @@ export async function runPreparedReply(
     originatingAccountId: ctx.AccountId,
     originatingThreadId: ctx.MessageThreadId,
     originatingChatType: ctx.ChatType,
+    hasRepliedRef: opts?.hasRepliedRef,
     run: {
       agentId,
       agentDir,

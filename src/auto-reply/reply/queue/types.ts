@@ -42,6 +42,14 @@ export type FollowupRun = {
   originatingThreadId?: string | number;
   /** Chat type for context-aware threading (e.g., DM vs channel). */
   originatingChatType?: string;
+  /**
+   * Mutable ref tracking whether a reply has already been sent in this
+   * dispatch cycle.  Used by Slack "first" threading mode to ensure only
+   * the first reply is threaded.  When a run is enqueued for followup
+   * processing the current state is captured so the followup runner can
+   * make correct threading decisions.
+   */
+  hasRepliedRef?: { value: boolean };
   run: {
     agentId: string;
     agentDir: string;
