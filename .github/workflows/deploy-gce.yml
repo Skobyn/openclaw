@@ -55,7 +55,7 @@ jobs:
 
             echo "==> Validating runtime config before deploy..."
             docker compose run --rm --no-deps clawdbot-gateway \
-              node dist/index.js config validate 2>&1 || {
+              node openclaw.mjs config validate 2>&1 || {
               echo "==> Config invalid — aborting deploy to keep bot running."
               exit 1
             }
