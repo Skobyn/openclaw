@@ -400,7 +400,11 @@ function formatPreservedTurnsSection(messages: AgentMessage[]): string {
   if (lines.length === 0) {
     return "";
   }
-  return `\n\n## Recent turns preserved verbatim\n${lines.join("\n")}`;
+  return (
+    `\n\n## Recent turns preserved verbatim\n` +
+    `The following turns are preserved for context continuity only. Do NOT repeat, echo, or rephrase these messages in your next response. They have already been delivered to the user.\n` +
+    lines.join("\n")
+  );
 }
 
 function wrapUntrustedInstructionBlock(label: string, text: string): string {
