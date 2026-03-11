@@ -11,6 +11,7 @@ services:
       - TERM=xterm-256color
       - CLAWDBOT_GATEWAY_BIND=${CLAWDBOT_GATEWAY_BIND}
       - CLAWDBOT_GATEWAY_PORT=${CLAWDBOT_GATEWAY_PORT}
+      - CLAWDBOT_GATEWAY_TOKEN=${CLAWDBOT_GATEWAY_TOKEN}
       - XDG_CONFIG_HOME=${XDG_CONFIG_HOME}
       - PATH=/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       - RUVECTOR_URL=http://host.docker.internal:8765
@@ -28,7 +29,8 @@ services:
     # group_add:
     #   - "${DOCKER_GID:-999}"
     ports:
-      - "18789:18789"
+      - "127.0.0.1:18789:18789"
+      - "127.0.0.1:18792:18792"
     entrypoint: ["/app/scripts/docker-entrypoint.sh"]
     command:
       [
@@ -39,5 +41,7 @@ services:
         "${CLAWDBOT_GATEWAY_BIND}",
         "--port",
         "${CLAWDBOT_GATEWAY_PORT}",
-        "--allow-unconfigured"
+        "--allow-unconfigured",
+        "--token",
+        "${CLAWDBOT_GATEWAY_TOKEN}"
       ]
