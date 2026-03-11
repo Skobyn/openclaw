@@ -50,8 +50,8 @@ jobs:
             git reset --hard origin/main
 
             echo "==> Pulling latest image from GHCR..."
-            echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
-            docker compose pull
+            echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin 2>/dev/null
+            docker compose pull --quiet
 
             echo "==> Validating runtime config before deploy..."
             docker compose run --rm --no-deps clawdbot-gateway \
