@@ -1,0 +1,50 @@
+{
+  "name": "openclaw-dual-agent-memory",
+  "version": "0.1.0",
+  "description": "OpenClaw plugin providing context-archive memory and epistemic trust monitoring for AI agents",
+  "keywords": [
+    "context-engine",
+    "epistemic",
+    "memory",
+    "openclaw",
+    "openclaw-plugin"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/dual-agent-memory"
+  },
+  "files": [
+    "dist",
+    "openclaw.plugin.json"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "openclaw": "^2026.3.12",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "better-sqlite3": ">=11.0.0"
+  },
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ]
+  }
+}
