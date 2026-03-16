@@ -23,7 +23,6 @@ services:
       - ./scripts/docker-entrypoint.sh:/app/scripts/docker-entrypoint.sh:ro
       - ./scripts/fetch-secrets.sh:/app/scripts/fetch-secrets.sh:ro
       - ./skills/humanizer:/app/skills/humanizer:ro
-      - ./extensions/dual-agent-memory:/app/extensions/dual-agent-memory:ro
       ## Uncomment the lines below to enable sandbox isolation
       ## (agents.defaults.sandbox). Requires Docker CLI in the image
       ## (build with --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1) or use
