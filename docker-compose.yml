@@ -18,11 +18,14 @@ services:
       - RUVECTOR_URL=http://host.docker.internal:8765
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "metadata.google.internal:169.254.169.254"
     volumes:
       - ${CLAWDBOT_CONFIG_DIR}:/home/node/.openclaw
       - ${CLAWDBOT_WORKSPACE_DIR}:/home/node/.openclaw/workspace
       - ./scripts/docker-entrypoint.sh:/app/scripts/docker-entrypoint.sh:ro
       - ./scripts/fetch-secrets.sh:/app/scripts/fetch-secrets.sh:ro
+      - /usr/lib/google-cloud-sdk:/usr/lib/google-cloud-sdk:ro
+      - /usr/bin/gcloud:/usr/bin/gcloud:ro
       - ./skills/humanizer:/app/skills/humanizer:ro
       ## Uncomment the lines below to enable sandbox isolation
       ## (agents.defaults.sandbox). Requires Docker CLI in the image
