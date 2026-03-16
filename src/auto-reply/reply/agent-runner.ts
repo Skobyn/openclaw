@@ -283,6 +283,10 @@ export async function runReplyAgent(params: {
       updatedAt: Date.now(),
       systemSent: false,
       abortedLastRun: false,
+      modelProvider: undefined,
+      model: undefined,
+      contextTokens: undefined,
+      systemPromptReport: undefined,
       fallbackNoticeSelectedModel: undefined,
       fallbackNoticeActiveModel: undefined,
       fallbackNoticeReason: undefined,
@@ -381,7 +385,7 @@ export async function runReplyAgent(params: {
       fallbackAttempts,
       directlySentBlockKeys,
     } = runOutcome;
-    let { didLogHeartbeatStrip, autoCompactionCompleted } = runOutcome;
+    let { didLogHeartbeatStrip, autoCompactionCount } = runOutcome;
 
     if (
       shouldInjectGroupIntro &&
@@ -665,12 +669,13 @@ export async function runReplyAgent(params: {
       }
     }
 
-    if (autoCompactionCompleted) {
+    if (autoCompactionCount > 0) {
       const count = await incrementRunCompactionCount({
         sessionEntry: activeSessionEntry,
         sessionStore: activeSessionStore,
         sessionKey,
         storePath,
+        amount: autoCompactionCount,
         lastCallUsage: runResult.meta?.agentMeta?.lastCallUsage,
         contextTokensUsed,
       });
