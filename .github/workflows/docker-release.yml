@@ -52,6 +52,7 @@ jobs:
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         run: |
           set -euo pipefail
+          IMAGE="${IMAGE,,}"  # lowercase for Docker
           tags=()
           slim_tags=()
           if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
