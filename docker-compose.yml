@@ -14,6 +14,7 @@ services:
       - CLAWDBOT_GATEWAY_TOKEN=${CLAWDBOT_GATEWAY_TOKEN}
       - XDG_CONFIG_HOME=${XDG_CONFIG_HOME}
       - PATH=/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - GOOGLE_APPLICATION_CREDENTIALS=/home/node/.openclaw/workspace/felix/.credentials/google-service-account.json
       - RUVECTOR_URL=http://host.docker.internal:8765
     extra_hosts:
       - "host.docker.internal:host-gateway"
