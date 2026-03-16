@@ -13,7 +13,7 @@ services:
       - CLAWDBOT_GATEWAY_PORT=${CLAWDBOT_GATEWAY_PORT}
       - CLAWDBOT_GATEWAY_TOKEN=${CLAWDBOT_GATEWAY_TOKEN}
       - XDG_CONFIG_HOME=${XDG_CONFIG_HOME}
-      - PATH=/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - PATH=/usr/lib/google-cloud-sdk/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       - GOOGLE_APPLICATION_CREDENTIALS=/home/node/.openclaw/workspace/felix/.credentials/google-service-account.json
       - RUVECTOR_URL=http://host.docker.internal:8765
     extra_hosts:
@@ -25,7 +25,6 @@ services:
       - ./scripts/docker-entrypoint.sh:/app/scripts/docker-entrypoint.sh:ro
       - ./scripts/fetch-secrets.sh:/app/scripts/fetch-secrets.sh:ro
       - /usr/lib/google-cloud-sdk:/usr/lib/google-cloud-sdk:ro
-      - /usr/bin/gcloud:/usr/bin/gcloud:ro
       - ./skills/humanizer:/app/skills/humanizer:ro
       ## Uncomment the lines below to enable sandbox isolation
       ## (agents.defaults.sandbox). Requires Docker CLI in the image
