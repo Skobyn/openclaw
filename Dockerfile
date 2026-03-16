@@ -145,11 +145,11 @@ COPY --from=runtime-assets --chown=node:node /app/dist ./dist
 COPY --from=runtime-assets --chown=node:node /app/node_modules ./node_modules
 COPY --from=runtime-assets --chown=node:node /app/package.json .
 COPY --from=runtime-assets --chown=node:node /app/openclaw.mjs .
-COPY --from=runtime-assets --chown=node:node /app/extensions ./extensions.src
-# Bundled extensions live in dist/extensions/ with relative imports to dist/
-# chunks (../../*.js). Symlink extensions/ → dist/extensions/ so the runtime
-# resolves both the plugin entry and its shared chunks correctly.
-RUN ln -s dist/extensions extensions
+COPY --from=runtime-assets --chown=node:node /app/extensions ./extensions
+# The plugin runtime resolver (loader.ts resolvePluginRuntimeModulePath) needs
+# src/plugins/runtime/index.ts which jiti transpiles at startup. Copy the full
+# src/ tree so all transitive imports resolve.
+COPY --from=runtime-assets --chown=node:node /app/src ./src
 COPY --from=runtime-assets --chown=node:node /app/skills ./skills
 COPY --from=runtime-assets --chown=node:node /app/docs ./docs
 COPY --from=runtime-assets --chown=node:node /app/scripts/docker-entrypoint.sh /app/scripts/fetch-secrets.sh ./scripts/
