@@ -146,6 +146,8 @@ COPY --from=runtime-assets --chown=node:node /app/node_modules ./node_modules
 COPY --from=runtime-assets --chown=node:node /app/package.json .
 COPY --from=runtime-assets --chown=node:node /app/openclaw.mjs .
 COPY --from=runtime-assets --chown=node:node /app/extensions ./extensions
+# Overlay bundled extension outputs so plugin runtime resolves compiled .js
+COPY --from=runtime-assets --chown=node:node /app/dist/extensions ./extensions
 COPY --from=runtime-assets --chown=node:node /app/skills ./skills
 COPY --from=runtime-assets --chown=node:node /app/docs ./docs
 COPY --from=runtime-assets --chown=node:node /app/scripts/docker-entrypoint.sh /app/scripts/fetch-secrets.sh ./scripts/
